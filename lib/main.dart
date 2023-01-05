@@ -1,12 +1,13 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
+import 'package:mynotes/constants/routes.dart';
 import 'package:mynotes/views/login_view.dart';
 import 'package:mynotes/views/verify_email_view.dart';
 import '../firebase_options.dart';
 import 'package:mynotes/views/register_view.dart';
 import 'dart:developer' as devtools;
+import 'package:mynotes/constants/routes.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -25,11 +26,7 @@ class MyApp extends StatelessWidget {
         primarySwatch: Colors.blue,
       ),
       home: const HomePage(),
-      routes: {
-        "/login/": (context) => const LoginView(),
-        "/register/": (context) => const RegisterView(),
-        "VerifyEmail/": (context) => const VerifyEmailView(),
-      },
+      routes: routes,
     );
   }
 }
@@ -74,6 +71,7 @@ class NotesView extends StatefulWidget {
 
 class _NotesViewState extends State<NotesView> {
   MenuAction? selectedMenu;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -85,11 +83,13 @@ class _NotesViewState extends State<NotesView> {
             onSelected: (MenuAction item) async {
               switch (item) {
                 case MenuAction.logout:
-                  final shouldLogout = await ShowLogOutDialog(context);
+                  final shouldLogout = await showLogOutDialog(context);
                   if (shouldLogout) {
                     await FirebaseAuth.instance.signOut();
-                    await Navigator.of(context)
-                        .pushNamedAndRemoveUntil("/login/", (route) => false);
+                    await Navigator.of(context).pushNamedAndRemoveUntil(
+                      "/login/",
+                      (route) => false,
+                    );
                   }
                   break;
 
@@ -111,7 +111,7 @@ class _NotesViewState extends State<NotesView> {
   }
 }
 
-Future<bool> ShowLogOutDialog(BuildContext context) {
+Future showLogOutDialog(BuildContext context) {
   return showDialog<bool>(
     context: context,
     builder: (context) => AlertDialog(

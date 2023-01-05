@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'dart:developer' as devtools;
 
 import '../firebase_options.dart';
 
@@ -76,18 +77,36 @@ class _LoginViewState extends State<LoginView> {
                         } on FirebaseAuthException catch (e) {
                           switch (e.code) {
                             case "user-not-found":
-                              print("user-not-found");
-                              break;
+                              return await showErrorDialog(
+                                context,
+                                "user not found",
+                              );
                             case "invalid-email":
-                              print("user-not-found");
-                              break;
+                              return await showErrorDialog(
+                                context,
+                                "invalid-email",
+                              );
                             case "wrong-password":
-                              print("wrong-password");
-                              break;
+                              return await showErrorDialog(
+                                context,
+                                "wrong-password",
+                              );
                             default:
-                              print("another error\n${e.code}");
+                              return await showErrorDialog(
+                                context,
+                                "another error(${e.code})",
+                              );
                           }
+                        } catch (e) {
+                          return await showErrorDialog(
+                            context,
+                            "another error(${e.toString})",
+                          );
                         }
+                        await Navigator.of(context).pushNamedAndRemoveUntil(
+                          "/homepage/",
+                          (route) => false,
+                        );
                       },
                       child: const Text("Login"),
                     ),
@@ -96,7 +115,7 @@ class _LoginViewState extends State<LoginView> {
                           Navigator.of(context).pushNamedAndRemoveUntil(
                               "/register/", (route) => false);
                         },
-                        child: Text("Create an account"))
+                        child: const Text("Create an account"))
                   ],
                 );
               default:
@@ -105,4 +124,27 @@ class _LoginViewState extends State<LoginView> {
           },
         ));
   }
+}
+
+Future<void> showErrorDialog(
+  BuildContext context,
+  String text,
+) {
+  return showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        title: Center(child: Text(text)),
+        actions: [
+          Center(
+            child: TextButton(
+                onPressed: () {
+                  Navigator.of(context).pop();
+                },
+                child: const Text("Cancel")),
+          )
+        ],
+      );
+    },
+  );
 }

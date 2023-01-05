@@ -1,6 +1,7 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
+import 'dart:developer' as devtools;
 
 import '../firebase_options.dart';
 
@@ -79,19 +80,19 @@ class _RegisterViewState extends State<RegisterView> {
                       } on FirebaseAuthException catch (e) {
                         switch (e.code) {
                           case "invalid-email":
-                            print("hehee");
+                            devtools.log("hehee");
                             break;
                           case "weak-password":
-                            print("haha");
+                            devtools.log("haha");
                             break;
                           case "email-already-in-use":
-                            print("hoho");
+                            devtools.log("hoho");
                             break;
                           default:
-                            print("another error");
+                            devtools.log("another error");
                         }
                       } catch (e) {
-                        print("another error${e}");
+                        devtools.log("another error ${e}");
                       }
                     },
                     child: const Text("Register"),
@@ -101,7 +102,7 @@ class _RegisterViewState extends State<RegisterView> {
                         Navigator.of(context).pushNamedAndRemoveUntil(
                             "/login/", (route) => false);
                       },
-                      child: Text("Already Registered?Login Here!"))
+                      child: const Text("Already Registered?Login Here!"))
                 ],
               );
             default:

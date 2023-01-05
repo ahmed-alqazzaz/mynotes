@@ -8,7 +8,7 @@ class VerifyEmailView extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Email Verification"),
+        title: const Text("Email Verification"),
       ),
       body: Column(
         children: [
@@ -18,7 +18,7 @@ class VerifyEmailView extends StatelessWidget {
               final user = FirebaseAuth.instance.currentUser;
               await user?.sendEmailVerification();
             },
-            child: Text("Send Email verification"),
+            child: const Text("Send Email verification"),
           )
         ],
       ),
