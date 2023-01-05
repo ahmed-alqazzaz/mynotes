@@ -13,7 +13,8 @@ Future<void> showErrorDialog(
           Center(
             child: TextButton(
                 onPressed: () {
-                  Navigator.of(context).pop();
+                  final navigator = Navigator.of(context);
+                  navigator.pop();
                 },
                 child: const Text("Cancel")),
           )

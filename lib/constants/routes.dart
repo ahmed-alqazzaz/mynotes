@@ -6,6 +6,6 @@ import '../views/verify_email_view.dart';
 final routes = {
   "/login/": (context) => const LoginView(),
   "/register/": (context) => const RegisterView(),
-  "VerifyEmail/": (context) => const VerifyEmailView(),
+  "/verifyemail/": (context) => const VerifyEmailView(),
   "/homepage/": (context) => const HomePage(),
 };

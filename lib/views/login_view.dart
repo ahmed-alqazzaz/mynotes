@@ -1,9 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'dart:developer' as devtools;
 
 import '../firebase_options.dart';
+import '../utilities/show_error_dialog.dart';
 
 class LoginView extends StatefulWidget {
   const LoginView({super.key});
@@ -103,7 +103,8 @@ class _LoginViewState extends State<LoginView> {
                             "another error(${e.toString})",
                           );
                         }
-                        await Navigator.of(context).pushNamedAndRemoveUntil(
+                        final navigator = Navigator.of(context);
+                        await navigator.pushNamedAndRemoveUntil(
                           "/homepage/",
                           (route) => false,
                         );
@@ -112,7 +113,8 @@ class _LoginViewState extends State<LoginView> {
                     ),
                     TextButton(
                         onPressed: () {
-                          Navigator.of(context).pushNamedAndRemoveUntil(
+                          final navigator = Navigator.of(context);
+                          navigator.pushNamedAndRemoveUntil(
                               "/register/", (route) => false);
                         },
                         child: const Text("Create an account"))
@@ -124,27 +126,4 @@ class _LoginViewState extends State<LoginView> {
           },
         ));
   }
-}
-
-Future<void> showErrorDialog(
-  BuildContext context,
-  String text,
-) {
-  return showDialog(
-    context: context,
-    builder: (context) {
-      return AlertDialog(
-        title: Center(child: Text(text)),
-        actions: [
-          Center(
-            child: TextButton(
-                onPressed: () {
-                  Navigator.of(context).pop();
-                },
-                child: const Text("Cancel")),
-          )
-        ],
-      );
-    },
-  );
 }

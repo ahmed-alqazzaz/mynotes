@@ -3,11 +3,10 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mynotes/constants/routes.dart';
 import 'package:mynotes/views/login_view.dart';
+import 'package:mynotes/views/register_view.dart';
 import 'package:mynotes/views/verify_email_view.dart';
 import '../firebase_options.dart';
-import 'package:mynotes/views/register_view.dart';
 import 'dart:developer' as devtools;
-import 'package:mynotes/constants/routes.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,13 +20,12 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Flutter Demo',
-      theme: ThemeData(
-        primarySwatch: Colors.blue,
-      ),
-      home: const HomePage(),
-      routes: routes,
-    );
+        title: 'Flutter Demo',
+        theme: ThemeData(
+          primarySwatch: Colors.blue,
+        ),
+        home: const HomePage(),
+        routes: routes);
   }
 }
 
@@ -86,7 +84,8 @@ class _NotesViewState extends State<NotesView> {
                   final shouldLogout = await showLogOutDialog(context);
                   if (shouldLogout) {
                     await FirebaseAuth.instance.signOut();
-                    await Navigator.of(context).pushNamedAndRemoveUntil(
+                    final navigator = Navigator.of(context);
+                    await navigator.pushNamedAndRemoveUntil(
                       "/login/",
                       (route) => false,
                     );
@@ -120,12 +119,14 @@ Future showLogOutDialog(BuildContext context) {
       actions: [
         TextButton(
             onPressed: () {
-              Navigator.of(context).pop(false);
+              final navigator = Navigator.of(context);
+              navigator.pop(false);
             },
             child: const Text("Cancel")),
         TextButton(
             onPressed: () {
-              Navigator.of(context).pop(true);
+              final navigator = Navigator.of(context);
+              navigator.pop(true);
             },
             child: const Text("Log Out"))
       ],

@@ -12,13 +12,26 @@ class VerifyEmailView extends StatelessWidget {
       ),
       body: Column(
         children: [
-          const Text("verify your email"),
+          const Text("We've sent you an email verification"),
+          const Text(
+              "If you have'nt received an email yet, click the button below"),
           TextButton(
             onPressed: () async {
               final user = FirebaseAuth.instance.currentUser;
               await user?.sendEmailVerification();
             },
             child: const Text("Send Email verification"),
+          ),
+          TextButton(
+            onPressed: () async {
+              await FirebaseAuth.instance.signOut();
+              final navigator = Navigator.of(context);
+              navigator.pushNamedAndRemoveUntil(
+                "/register/",
+                (route) => false,
+              );
+            },
+            child: const Text("Restart"),
           )
         ],
       ),
