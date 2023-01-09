@@ -1,8 +1,7 @@
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-
-import '../firebase_options.dart';
+import 'package:mynotes/services/auth/auth_exceptions.dart';
+import 'package:mynotes/services/auth/auth_service.dart';
+import 'package:mynotes/services/auth/auth_service.dart';
 import '../utilities/show_error_dialog.dart';
 
 class LoginView extends StatefulWidget {
@@ -39,8 +38,7 @@ class _LoginViewState extends State<LoginView> {
           title: const Text("Login"),
         ),
         body: FutureBuilder(
-          future: Firebase.initializeApp(
-              options: DefaultFirebaseOptions.currentPlatform),
+          future: AuthService.firebase().initialize(),
           builder: (context, snapshot) {
             switch (snapshot.connectionState) {
               case ConnectionState.done:
@@ -68,41 +66,39 @@ class _LoginViewState extends State<LoginView> {
                       onPressed: () async {
                         final email = _email.text;
                         final password = _password.text;
+
                         try {
-                          await FirebaseAuth.instance
-                              .signInWithEmailAndPassword(
+                          await AuthService.firebase().logIn(
                             email: email,
                             password: password,
                           );
-                        } on FirebaseAuthException catch (e) {
-                          switch (e.code) {
-                            case "user-not-found":
-                              return await showErrorDialog(
-                                context,
-                                "user not found",
-                              );
-                            case "invalid-email":
-                              return await showErrorDialog(
-                                context,
-                                "invalid-email",
-                              );
-                            case "wrong-password":
-                              return await showErrorDialog(
-                                context,
-                                "wrong-password",
-                              );
-                            default:
-                              return await showErrorDialog(
-                                context,
-                                "another error(${e.code})",
-                              );
-                          }
+                        } on UserNotFoundAuthException {
+                          return await showErrorDialog(
+                            context,
+                            "user not found",
+                          );
+                        } on InvalidEmailAuthException {
+                          return await showErrorDialog(
+                            context,
+                            "invalid email",
+                          );
+                        } on WrongPasswordAuthException {
+                          return await showErrorDialog(
+                            context,
+                            "wrong password",
+                          );
+                        } on GenericAuthException {
+                          return await showErrorDialog(
+                            context,
+                            "another error",
+                          );
                         } catch (e) {
                           return await showErrorDialog(
                             context,
-                            "another error(${e.toString})",
+                            "another error(${e.toString()})",
                           );
                         }
+
                         final navigator = Navigator.of(context);
                         await navigator.pushNamedAndRemoveUntil(
                           "/homepage/",

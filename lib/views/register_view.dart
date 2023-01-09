@@ -1,8 +1,6 @@
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-
-import '../firebase_options.dart';
+import 'package:mynotes/services/auth/auth_exceptions.dart';
+import 'package:mynotes/services/auth/auth_service.dart';
 import '../utilities/show_error_dialog.dart';
 
 class RegisterView extends StatefulWidget {
@@ -40,9 +38,7 @@ class _RegisterViewState extends State<RegisterView> {
         title: const Text("Register"),
       ),
       body: FutureBuilder(
-        future: Firebase.initializeApp(
-          options: DefaultFirebaseOptions.currentPlatform,
-        ),
+        future: AuthService.firebase().initialize(),
         builder: (context, snapshot) {
           switch (snapshot.connectionState) {
             case ConnectionState.done:
@@ -72,46 +68,41 @@ class _RegisterViewState extends State<RegisterView> {
                       final password = _password.text;
 
                       try {
-                        await FirebaseAuth.instance
-                            .createUserWithEmailAndPassword(
+                        await AuthService.firebase().createUser(
                           email: email,
                           password: password,
                         );
-                        await FirebaseAuth.instance.currentUser
-                            ?.sendEmailVerification();
-                        final navigator = Navigator.of(context);
-                        await navigator.pushNamed(
-                          "/verifyemail/",
+                      } on InvalidEmailAuthException {
+                        return await showErrorDialog(
+                          context,
+                          "invalid-email",
                         );
-                      } on FirebaseAuthException catch (e) {
-                        switch (e.code) {
-                          case "invalid-email":
-                            return await showErrorDialog(
-                              context,
-                              "invalid-email",
-                            );
-                          case "weak-password":
-                            return await showErrorDialog(
-                              context,
-                              "weak-password",
-                            );
-                          case "email-already-in-use":
-                            return await showErrorDialog(
-                              context,
-                              "email-already-in-use",
-                            );
-                          default:
-                            return await showErrorDialog(
-                              context,
-                              "another error",
-                            );
-                        }
+                      } on WeakPasswordAuthException {
+                        return await showErrorDialog(
+                          context,
+                          "weak-password",
+                        );
+                      } on EmailAlreadyInUseAuthException {
+                        return await showErrorDialog(
+                          context,
+                          "email-already-in-use",
+                        );
+                      } on GenericAuthException {
+                        return await showErrorDialog(
+                          context,
+                          "another-error",
+                        );
                       } catch (e) {
                         return await showErrorDialog(
                           context,
-                          "another error(${e.toString()})",
+                          "another-error",
                         );
                       }
+                      AuthService.firebase().sendEmailVerification();
+                      final navigator = Navigator.of(context);
+                      await navigator.pushNamed(
+                        "/verifyemail/",
+                      );
                     },
                     child: const Text("Register"),
                   ),
