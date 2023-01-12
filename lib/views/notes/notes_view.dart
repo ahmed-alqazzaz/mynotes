@@ -3,7 +3,7 @@ import 'package:mynotes/services/auth/auth_service.dart';
 import 'package:mynotes/services/crud/notes_services.dart';
 import 'dart:developer' as devtools;
 
-import '../enums/menu_action.dart';
+import '../../enums/menu_action.dart';
 
 class NotesView extends StatefulWidget {
   const NotesView({super.key});
@@ -37,8 +37,16 @@ class _NotesViewState extends State<NotesView> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Main Ui"),
+        title: const Text("Your Notes"),
         actions: [
+          IconButton(
+              onPressed: () async {
+                final navigator = Navigator.of(context);
+                await navigator.pushNamed(
+                  "/notes/new-note/",
+                );
+              },
+              icon: const Icon(Icons.add)),
           PopupMenuButton<MenuAction>(
             initialValue: selectedMenu,
             onSelected: (MenuAction item) async {
@@ -60,13 +68,13 @@ class _NotesViewState extends State<NotesView> {
                   devtools.log("TODO");
               }
             },
-            itemBuilder: ((BuildContext context) =>
+            itemBuilder: (BuildContext context) =>
                 const <PopupMenuEntry<MenuAction>>[
-                  PopupMenuItem<MenuAction>(
-                    value: MenuAction.logout,
-                    child: Text("Log out"),
-                  )
-                ]),
+              PopupMenuItem<MenuAction>(
+                value: MenuAction.logout,
+                child: Text("Log out"),
+              )
+            ],
           )
         ],
       ),
