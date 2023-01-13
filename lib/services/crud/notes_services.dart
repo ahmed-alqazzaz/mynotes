@@ -90,7 +90,7 @@ class NotesService {
     Database DB = await db;
     final deletedCount = await DB.delete(
       noteTable,
-      where: 'id',
+      where: 'id = ?',
       whereArgs: [id],
     );
 
