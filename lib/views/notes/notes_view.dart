@@ -29,6 +29,7 @@ class _NotesViewState extends State<NotesView> {
 
   @override
   void dispose() {
+    //you should remove close
     _notesService.close();
     super.dispose();
   }
@@ -36,71 +37,92 @@ class _NotesViewState extends State<NotesView> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text("Your Notes"),
-        actions: [
-          IconButton(
-              onPressed: () async {
-                final navigator = Navigator.of(context);
-                await navigator.pushNamed(
-                  "/notes/new-note/",
-                );
+        appBar: AppBar(
+          title: const Text("Your Notes"),
+          actions: [
+            PopupMenuButton<MenuAction>(
+              initialValue: selectedMenu,
+              onSelected: (MenuAction item) async {
+                final x = await _notesService.getAllNotes();
+                print(x);
+                switch (item) {
+                  case MenuAction.logout:
+                    final shouldLogout = await showLogOutDialog(context);
+                    if (shouldLogout) {
+                      await AuthService.firebase().logOut();
+
+                      final navigator = Navigator.of(context);
+                      await navigator.pushNamedAndRemoveUntil(
+                        "/login/",
+                        (route) => false,
+                      );
+                    }
+                    break;
+
+                  default:
+                    devtools.log("TODO");
+                }
               },
-              icon: const Icon(Icons.add)),
-          PopupMenuButton<MenuAction>(
-            initialValue: selectedMenu,
-            onSelected: (MenuAction item) async {
-              switch (item) {
-                case MenuAction.logout:
-                  final shouldLogout = await showLogOutDialog(context);
-                  if (shouldLogout) {
-                    await AuthService.firebase().logOut();
+              itemBuilder: (BuildContext context) =>
+                  const <PopupMenuEntry<MenuAction>>[
+                PopupMenuItem<MenuAction>(
+                  value: MenuAction.logout,
+                  child: Text("Log out"),
+                )
+              ],
+            )
+          ],
+        ),
+        body: FutureBuilder(
+          future: _notesService.getUser(email: userEmail),
+          builder: ((context, snapshot) {
+            switch (snapshot.connectionState) {
+              case ConnectionState.done:
+                return StreamBuilder(
+                  stream: _notesService.allNotes,
+                  builder: (context, snapshot) {
+                    switch (snapshot.connectionState) {
+                      case ConnectionState.waiting:
+                      case ConnectionState.active:
+                        if (snapshot.hasData) {
+                          final allNotes = snapshot.data as List<DatabaseNote>;
 
-                    final navigator = Navigator.of(context);
-                    await navigator.pushNamedAndRemoveUntil(
-                      "/login/",
-                      (route) => false,
-                    );
-                  }
-                  break;
+                          return ListView.builder(
+                            itemCount: allNotes.length,
+                            itemBuilder: ((context, index) {
+                              final note = allNotes[index];
+                              return ListTile(
+                                title: Text(
+                                  note.text,
+                                  overflow: TextOverflow.ellipsis,
+                                  softWrap: false,
+                                  maxLines: 1,
+                                ),
+                              );
+                            }),
+                          );
+                        } else {
+                          return const CircularProgressIndicator();
+                        }
 
-                default:
-                  devtools.log("TODO");
-              }
-            },
-            itemBuilder: (BuildContext context) =>
-                const <PopupMenuEntry<MenuAction>>[
-              PopupMenuItem<MenuAction>(
-                value: MenuAction.logout,
-                child: Text("Log out"),
-              )
-            ],
-          )
-        ],
-      ),
-      body: FutureBuilder(
-        future: _notesService.getUser(email: userEmail),
-        builder: ((context, snapshot) {
-          switch (snapshot.connectionState) {
-            case ConnectionState.done:
-              return StreamBuilder(
-                stream: _notesService.allNotes,
-                builder: (context, snapshot) {
-                  switch (snapshot.connectionState) {
-                    case ConnectionState.waiting:
-                      return const Text("waiting");
-
-                    default:
-                      return const CircularProgressIndicator();
-                  }
-                },
+                      default:
+                        return const CircularProgressIndicator();
+                    }
+                  },
+                );
+              default:
+                return const CircularProgressIndicator();
+            }
+          }),
+        ),
+        floatingActionButton: FloatingActionButton(
+            onPressed: () async {
+              final navigator = Navigator.of(context);
+              await navigator.pushNamed(
+                "/notes/new-note/",
               );
-            default:
-              return const CircularProgressIndicator();
-          }
-        }),
-      ),
-    );
+            },
+            child: const Icon(Icons.add)));
   }
 }
 
