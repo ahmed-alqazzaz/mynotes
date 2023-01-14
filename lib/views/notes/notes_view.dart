@@ -89,10 +89,17 @@ class _NotesViewState extends State<NotesView> {
                         if (snapshot.hasData) {
                           final allNotes = snapshot.data as List<DatabaseNote>;
                           return NotesListView(
-                              notes: allNotes,
-                              onDeleteNote: (note) async {
-                                await _notesService.deleteNote(id: note.id);
-                              });
+                            notes: allNotes,
+                            onDeleteNote: (note) async {
+                              await _notesService.deleteNote(id: note.id);
+                            },
+                            onTap: (note) async {
+                              final navigator = Navigator.of(context);
+                              await navigator.pushNamed(
+                                  "/notes/create-update-note/",
+                                  arguments: note);
+                            },
+                          );
                         } else {
                           return const CircularProgressIndicator();
                         }
@@ -111,7 +118,7 @@ class _NotesViewState extends State<NotesView> {
             onPressed: () async {
               final navigator = Navigator.of(context);
               await navigator.pushNamed(
-                "/notes/new-note/",
+                "/notes/create-update-note/",
               );
             },
             child: const Icon(Icons.add)));

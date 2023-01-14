@@ -104,9 +104,6 @@ class NotesService {
 
   Future<DatabaseNote?> createNote(
       {required DatabaseUser owner, required String text}) async {
-    if (text.isEmpty) {
-      return null;
-    }
     Database DB = await db;
     //check if user really exists
     final dbUser = await getUser(email: owner.email);
@@ -275,7 +272,7 @@ const createUserTableCommand =
 const createNoteTableCommand = '''CREATE TABLE IF NOT EXISTS "note" (
         "id" INTEGER PRIMARY KEY NOT NULL,
         "user_id" INTEGER NOT NULL,
-        "text" TEXT NOT NULL,
+        "text" TEXT,
         'is_synced_with_cloud' INTEGER NOT NULL DEFAULT 0,
          FOREIGN KEY ("user_id") REFERENCES "users"("id")
       )''';

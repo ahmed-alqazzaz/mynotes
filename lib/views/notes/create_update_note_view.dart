@@ -1,17 +1,19 @@
 import 'package:flutter/material.dart';
 import 'package:mynotes/services/auth/auth_service.dart';
 import 'package:mynotes/services/crud/notes_services.dart';
+import 'package:mynotes/utilities/generics/get_argument.dart';
 
 import '../../services/auth/auth_user.dart';
 
-class NewNoteView extends StatefulWidget {
-  const NewNoteView({super.key});
+class CreateUpdateNote extends StatefulWidget {
+  const CreateUpdateNote({super.key});
 
   @override
-  State<NewNoteView> createState() => _NewNoteViewState();
+  State<CreateUpdateNote> createState() => _CreateUpdateNoteState();
 }
 
-class _NewNoteViewState extends State<NewNoteView> {
+class _CreateUpdateNoteState extends State<CreateUpdateNote> {
+  bool _hasCreatedNote = false;
   DatabaseNote? _note;
   late final NotesService _notesService;
   late final TextEditingController _textEditingController;
@@ -31,32 +33,40 @@ class _NewNoteViewState extends State<NewNoteView> {
   void _textControllerListener() async {
     final existingNote = _note;
     // in case note has never been created yet
-    if (existingNote == null) {
-      return await createNewNote();
+    if (!_hasCreatedNote) {
+      _note = await createNewNote();
+      await Future.delayed(const Duration(seconds: 5));
+      return;
     }
-    final id = existingNote.id;
-    updateNote(id: id);
+    await updateNote();
   }
 
-  Future<void> createNewNote() async {
+  Future<DatabaseNote?> createNewNote() async {
+    _hasCreatedNote = true;
     final AuthUser currentUser = AuthService.firebase().currentUser!;
     final DatabaseUser owner =
         await _notesService.getUser(email: currentUser.email!);
     final text = _textEditingController.text;
+
     final note = await _notesService.createNote(owner: owner, text: text);
     _note = note;
+    print("a$note");
+    return note;
   }
 
-  Future<void> updateNote({required int id}) async {
+  Future<void> updateNote() async {
     final text = _textEditingController.text;
-    final oldNote = await _notesService.getNote(id: id);
-    if (oldNote.text != text) {
-      await _notesService.updateNote(note: oldNote, text: text);
+    final oldNote = _note;
+    if (oldNote!.text != text) {
+      _note = await _notesService.updateNote(note: oldNote, text: text);
     }
   }
 
   @override
   void dispose() {
+    if (_textEditingController.text.isEmpty && _note != null) {
+      _notesService.deleteNote(id: _note!.id);
+    }
     _textEditingController.dispose();
     super.dispose();
   }
@@ -67,9 +77,18 @@ class _NewNoteViewState extends State<NewNoteView> {
       appBar: AppBar(
         title: const Text("New Note"),
       ),
-      body: () {
+      body: (BuildContext context) {
+        // if it does'nt work, consider conditional assignment
+        final noteWidget = context.getArgument<DatabaseNote>();
+        if (noteWidget != null) {
+          _hasCreatedNote = true;
+          _note = context.getArgument<DatabaseNote>();
+          _textEditingController.text = _note?.text ?? "";
+        }
+
         _setUpTextControllerListener();
         return TextField(
+          autofocus: true,
           controller: _textEditingController,
           keyboardType: TextInputType.multiline,
           maxLines: null,
@@ -77,7 +96,7 @@ class _NewNoteViewState extends State<NewNoteView> {
             hintText: "Start Typing Your Notes...",
           ),
         );
-      }(),
+      }(context),
     );
   }
 }
