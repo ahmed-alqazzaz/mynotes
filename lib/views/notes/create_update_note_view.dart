@@ -45,7 +45,7 @@ class _CreateUpdateNoteState extends State<CreateUpdateNote> {
     _hasCreatedNote = true;
     final AuthUser currentUser = AuthService.firebase().currentUser!;
     final DatabaseUser owner =
-        await _notesService.getUser(email: currentUser.email!);
+        await _notesService.getOrCreateUser(email: currentUser.email!);
     final text = _textEditingController.text;
 
     final note = await _notesService.createNote(owner: owner, text: text);

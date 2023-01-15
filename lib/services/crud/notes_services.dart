@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
+import 'package:mynotes/extensions/list/filter.dart';
 import 'package:sqflite/sqflite.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:path/path.dart' show join;
@@ -22,32 +23,51 @@ class NotesService {
   Database? _db;
 
   List<DatabaseNote> _notes = [];
+  DatabaseUser? _user;
   late final StreamController<List<DatabaseNote>> _notesStreamController;
 
-  Stream<List<DatabaseNote>> get allNotes => _notesStreamController.stream;
+  Stream<List<DatabaseNote>> get allNotes =>
+      _notesStreamController.stream.filter((note) {
+        final currentUser = _user;
+        if (currentUser != null) {
+          return note.userId == currentUser.id;
+        } else {
+          throw UserShouldBeSetBeforeReadingAllNotesException();
+        }
+      });
   Future<void> _cache() async {
-    final allNotes = await getAllNotes();
-    _notesStreamController.add(allNotes.toList());
+    final allNotes = (await getAllNotes()).toList();
+    _notes = allNotes;
+    _notesStreamController.add(allNotes);
   }
 
-  Future<DatabaseUser> getOrCreateUser({required String email}) async {
-    try {
-      return await getUser(email: email);
-    } on CouldNotFindUserException {
-      return await createUser(email: email);
-    } catch (e) {
-      rethrow;
-    }
-  }
+  // Future<DatabaseUser> getOrCreateUser(
+  //     {required String email, bool setAsCurrentUser = true}) async {
+  //   DatabaseUser user;
+  //   try {
+  //     user = await getUser(email: email);
+  //   } on CouldNotFindUserException {
+  //     user = await createUser(email: email);
+  //   } catch (e) {
+  //     rethrow;
+  //   }
+  //   if (setAsCurrentUser) {
+  //     _user = user;
+  //   }
+  //   return user;
+  // }
 
   Future<DatabaseNote> updateNote(
       {required DatabaseNote note, required String text}) async {
     Database DB = await db;
-    await getNote(id: note.id);
     final updatedCount = await DB.update(
       noteTable,
-      where: idColumn,
-      {textColumn: text, isSyncedWithCloudColumn: 0},
+      whereArgs: [note.id],
+      where: "$idColumn = ?",
+      {
+        textColumn: text,
+        isSyncedWithCloudColumn: 0,
+      },
     );
     if (updatedCount == 0) {
       throw CouldNotUpdateNotesException();
@@ -62,7 +82,9 @@ class NotesService {
   Future<Iterable<DatabaseNote>> getAllNotes() async {
     Database DB = await db;
     final notes = await DB.query(noteTable);
-    return notes.map((noteRow) => DatabaseNote.fromRow(noteRow));
+    final x = notes.map((noteRow) => DatabaseNote.fromRow(noteRow));
+    _notesStreamController.add(x.toList());
+    return x;
   }
 
   Future<DatabaseNote> getNote({required int id}) async {
@@ -106,7 +128,7 @@ class NotesService {
       {required DatabaseUser owner, required String text}) async {
     Database DB = await db;
     //check if user really exists
-    final dbUser = await getUser(email: owner.email);
+    final dbUser = await getOrCreateUser(email: owner.email);
     if (dbUser != owner) {
       throw CouldNotDeleteUserException();
     }
@@ -128,7 +150,10 @@ class NotesService {
     return databaseNote;
   }
 
-  Future<DatabaseUser> getUser({required String email}) async {
+  Future<DatabaseUser> getOrCreateUser({
+    required String email,
+    bool setAsCurrentUser = true,
+  }) async {
     Database DB = await db;
     final results = await DB.query(
       userTable,
@@ -136,12 +161,18 @@ class NotesService {
       where: "email = ?",
       whereArgs: [email.toLowerCase()],
     );
+
     if (results.isEmpty) {
       //in case no user found create the user and recursively execute the function
       await createUser(email: email);
-      return await getUser(email: email);
+      return await getOrCreateUser(email: email);
     }
-    return DatabaseUser.fromRow(results.first);
+
+    final DatabaseUser user = DatabaseUser.fromRow(results.first);
+    if (setAsCurrentUser) {
+      _user = user;
+    }
+    return user;
   }
 
   Future<DatabaseUser> createUser({required String email}) async {
