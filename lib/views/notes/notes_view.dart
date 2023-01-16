@@ -19,9 +19,6 @@ class _NotesViewState extends State<NotesView> {
 
   late NotesService _notesService;
   String get userEmail => AuthService.firebase().currentUser!.email!;
-  Future<void> j() async {
-    await _notesService.open();
-  }
 
   @override
   void initState() {
@@ -38,8 +35,6 @@ class _NotesViewState extends State<NotesView> {
             PopupMenuButton<MenuAction>(
               initialValue: selectedMenu,
               onSelected: (MenuAction item) async {
-                final x = await _notesService.getAllNotes();
-                print(x);
                 switch (item) {
                   case MenuAction.logout:
                     final shouldLogout = await showLogOutDialog(context);

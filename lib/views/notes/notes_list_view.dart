@@ -44,6 +44,5 @@ class NotesListView extends StatelessWidget {
             onTap: () => onTap(note));
       }),
     );
-    ;
   }
 }
