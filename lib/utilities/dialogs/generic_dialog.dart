@@ -12,19 +12,21 @@ Future<T?> showGenericDialog<T>(
       context: context,
       builder: (context) {
         return AlertDialog(
-            content: Text(content),
-            title: Text(title),
-            actions: options.keys.map((optionTitle) {
-              return TextButton(
-                  onPressed: () {
-                    final T value = options[optionTitle];
-                    if (value != null) {
-                      Navigator.of(context).pop(value);
-                    } else {
-                      Navigator.of(context).pop();
-                    }
-                  },
-                  child: Text(optionTitle));
-            }).toList());
+          content: Text(content),
+          title: Text(title),
+          actions: options.keys.map((optionTitle) {
+            return TextButton(
+                onPressed: () {
+                  final T value = options[optionTitle];
+                  if (value != null) {
+                    Navigator.of(context).pop(value);
+                  } else {
+                    Navigator.of(context).pop();
+                  }
+                },
+                child: Text(optionTitle));
+          }).toList(),
+          actionsAlignment: MainAxisAlignment.spaceEvenly,
+        );
       });
 }
