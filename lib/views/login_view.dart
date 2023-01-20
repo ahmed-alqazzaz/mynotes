@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:mynotes/bloc/auth_bloc.dart';
+import 'package:mynotes/bloc/auth_event.dart';
 import 'package:mynotes/services/auth/auth_exceptions.dart';
 import 'package:mynotes/services/auth/auth_service.dart';
 import 'package:mynotes/services/auth/auth_service.dart';
@@ -68,10 +71,12 @@ class _LoginViewState extends State<LoginView> {
                         final password = _password.text;
 
                         try {
-                          await AuthService.firebase().logIn(
-                            email: email,
-                            password: password,
-                          );
+                          context.read<AuthBloc>().add(
+                              AuthEventLogin(email: email, password: password));
+                          // await AuthService.firebase().logIn(
+                          //   email: email,
+                          //   password: password,
+                          // );
                         } on UserNotFoundAuthException {
                           return await showErrorDialog(
                             context,
@@ -99,11 +104,11 @@ class _LoginViewState extends State<LoginView> {
                           );
                         }
 
-                        final navigator = Navigator.of(context);
-                        await navigator.pushNamedAndRemoveUntil(
-                          "/homepage/",
-                          (route) => false,
-                        );
+                        // final navigator = Navigator.of(context);
+                        // await navigator.pushNamedAndRemoveUntil(
+                        //   "/homepage/",
+                        //   (route) => false,
+                        // );
                       },
                       child: const Text("Login"),
                     ),
