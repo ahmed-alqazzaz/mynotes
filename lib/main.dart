@@ -3,10 +3,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:mynotes/bloc/auth_event.dart';
 import 'package:mynotes/bloc/auth_state.dart';
 import 'package:mynotes/constants/routes.dart';
+import 'package:mynotes/helpers/loading/loading_screen.dart';
+
 import 'package:mynotes/views/login_view.dart';
 import 'package:mynotes/views/notes/notes_view.dart';
+import 'package:mynotes/views/register_view.dart';
 import 'package:mynotes/views/verify_email_view.dart';
-import '../firebase_options.dart';
+
 import 'package:mynotes/services/auth/auth_service.dart';
 
 import 'bloc/auth_bloc.dart';
@@ -28,7 +31,8 @@ class MyApp extends StatelessWidget {
           primarySwatch: Colors.blue,
         ),
         home: BlocProvider(
-          create: (context) => AuthBloc(provider: AuthService.firebase()),
+          create: (context) =>
+              AuthBloc(provider: AuthService.firebase(), context: context),
           child: HomePage(),
         ),
         routes: routes);
@@ -41,18 +45,30 @@ class HomePage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     context.read<AuthBloc>().add(const AuthEventInitialize());
-    return BlocBuilder<AuthBloc, AuthState>(builder: (context, state) {
-      if (state is AuthStateLoggedIn) {
-        return const NotesView();
-      } else if (state is AuthStateLoggedOut) {
-        return const LoginView();
-      } else if (state is AuthStateRegisteredNeedsVerification) {
-        return const VerifyEmailView();
-      } else {
-        // this should be changed in the future
-        return const LoginView();
-      }
-    });
+    return BlocConsumer<AuthBloc, AuthState>(
+      builder: (context, state) {
+        if (state is AuthStateLoggedIn) {
+          return const NotesView();
+        } else if (state is AuthStateLoggedOut) {
+          return const LoginView();
+        } else if (state is AuthStateRegisteredNeedsVerification) {
+          return const VerifyEmailView();
+        } else if (state is AuthStateRegistering) {
+          return const RegisterView();
+        } else {
+          // this should be changed in the future
+          return const LoginView();
+        }
+      },
+      listener: (context, state) {
+        print("hhhh${state.loading}");
+        if (state.loading == true) {
+          LoadingScreen().show(context: context, text: "Loading");
+        } else {
+          LoadingScreen().hide();
+        }
+      },
+    );
 
     return FutureBuilder(
       future: AuthService.firebase().initialize(),
