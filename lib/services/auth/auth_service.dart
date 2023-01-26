@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mynotes/services/auth/auth_user.dart';
 import 'package:mynotes/services/auth/auth_provider.dart';
 import 'package:mynotes/services/auth/firebase_auth_provider.dart';
@@ -34,4 +35,12 @@ class AuthService implements AuthProvider {
 
   @override
   Future<void> sendEmailVerification() => provider.sendEmailVerification();
+
+  @override
+  Future<void> changePassword(
+          {required String email,
+          required String password,
+          required String newPassword}) async =>
+      await provider.changePassword(
+          email: email, password: password, newPassword: newPassword);
 }

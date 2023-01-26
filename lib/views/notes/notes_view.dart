@@ -42,7 +42,6 @@ class _NotesViewState extends State<NotesView> {
             PopupMenuButton<MenuAction>(
               initialValue: selectedMenu,
               onSelected: (MenuAction item) async {
-                CloudNote(documentId: '', ownerUserId: '', text: '').x();
                 switch (item) {
                   case MenuAction.logout:
                     final shouldLogout = await showLogOutDialog(context);
@@ -50,7 +49,9 @@ class _NotesViewState extends State<NotesView> {
                       context.read<AuthBloc>().add(AuthEventLogout());
                     }
                     break;
-
+                  case MenuAction.resetPassword:
+                    context.read<AuthBloc>().add(AuthEventChangePassword());
+                    break;
                   default:
                     devtools.log("TODO");
                 }
@@ -60,6 +61,10 @@ class _NotesViewState extends State<NotesView> {
                 PopupMenuItem<MenuAction>(
                   value: MenuAction.logout,
                   child: Text("Log out"),
+                ),
+                PopupMenuItem<MenuAction>(
+                  value: MenuAction.resetPassword,
+                  child: Text("Reset Password"),
                 )
               ],
             )

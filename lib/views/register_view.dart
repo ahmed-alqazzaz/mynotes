@@ -65,65 +65,52 @@ class _RegisterViewState extends State<RegisterView> {
         }
       },
       child: Scaffold(
-        appBar: AppBar(
-          title: const Text("Register"),
-        ),
-        body: FutureBuilder(
-          future: AuthService.firebase().initialize(),
-          builder: (context, snapshot) {
-            switch (snapshot.connectionState) {
-              case ConnectionState.done:
-                return Center(
-                  child: Column(
-                    children: [
-                      TextField(
-                        controller: _email,
-                        autofocus: true,
-                        autocorrect: false,
-                        keyboardType: TextInputType.emailAddress,
-                        decoration: const InputDecoration(
-                          hintText: "Enter Your Email Here",
-                        ),
-                      ),
-                      TextField(
-                        controller: _password,
-                        autocorrect: false,
-                        enableSuggestions: false,
-                        obscureText: true,
-                        decoration: const InputDecoration(
-                          hintText: "Enter Your Password Here",
-                        ),
-                      ),
-                      TextButton(
-                        onPressed: () async {
-                          final email = _email.text;
-                          final password = _password.text;
+          appBar: AppBar(
+            title: const Text("Register"),
+          ),
+          body: Column(
+            children: [
+              TextField(
+                controller: _email,
+                autofocus: true,
+                autocorrect: false,
+                keyboardType: TextInputType.emailAddress,
+                decoration: const InputDecoration(
+                  hintText: "Enter Your Email Here",
+                ),
+              ),
+              TextField(
+                controller: _password,
+                autocorrect: false,
+                enableSuggestions: false,
+                obscureText: true,
+                decoration: const InputDecoration(
+                  hintText: "Enter Your Password Here",
+                ),
+              ),
+              TextButton(
+                onPressed: () async {
+                  final email = _email.text;
+                  final password = _password.text;
 
-                          context.read<AuthBloc>().add(
-                                AuthEventRegister(
-                                  email: email,
-                                  password: password,
-                                ),
-                              );
-                        },
-                        child: const Text("Register"),
-                      ),
-                      TextButton(
-                          onPressed: () async {
-                            context.read<AuthBloc>().add(
-                                  const AuthEventLogout(),
-                                );
-                          },
-                          child: const Text("Already Registered?Login Here!"))
-                    ],
-                  ),
-                );
-              default:
-                return const Text("Loading");
-            }
-          },
-        ),
-      ),
+                  context.read<AuthBloc>().add(
+                        AuthEventRegister(
+                          email: email,
+                          password: password,
+                        ),
+                      );
+                },
+                child: const Text("Register"),
+              ),
+              TextButton(
+                  onPressed: () async {
+                    context.read<AuthBloc>().add(
+                          const AuthEventLogout(),
+                        );
+                  },
+                  child: const Text("Already Registered?Login Here!"))
+            ],
+          )),
     );
   }
 }

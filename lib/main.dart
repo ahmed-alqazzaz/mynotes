@@ -4,6 +4,7 @@ import 'package:mynotes/bloc/auth_event.dart';
 import 'package:mynotes/bloc/auth_state.dart';
 import 'package:mynotes/constants/routes.dart';
 import 'package:mynotes/helpers/loading/loading_screen.dart';
+import 'package:mynotes/views/change_password_view.dart';
 
 import 'package:mynotes/views/login_view.dart';
 import 'package:mynotes/views/notes/notes_view.dart';
@@ -33,7 +34,7 @@ class MyApp extends StatelessWidget {
         home: BlocProvider(
           create: (context) =>
               AuthBloc(provider: AuthService.firebase(), context: context),
-          child: HomePage(),
+          child: const HomePage(),
         ),
         routes: routes);
   }
@@ -55,38 +56,23 @@ class HomePage extends StatelessWidget {
           return const VerifyEmailView();
         } else if (state is AuthStateRegistering) {
           return const RegisterView();
+        } else if (state is AuthStateChangingPassword) {
+          if (state.performed == true && state.exception == null) {
+            return NotesView();
+          } else {
+            return ChangePasswordView();
+          }
         } else {
           // this should be changed in the future
-          return const LoginView();
+          return const CircularProgressIndicator();
         }
       },
       listener: (context, state) {
-        print("hhhh${state.loading}");
-        if (state.loading == true) {
-          LoadingScreen().show(context: context, text: "Loading");
+        if (state.loading is Loading) {
+          LoadingScreen().show(
+              context: context, text: state.loading!.text ?? "Loading ...");
         } else {
           LoadingScreen().hide();
-        }
-      },
-    );
-
-    return FutureBuilder(
-      future: AuthService.firebase().initialize(),
-      builder: (context, snapshot) {
-        switch (snapshot.connectionState) {
-          case ConnectionState.done:
-            final user = AuthService.firebase().currentUser;
-
-            if (user != null && user.isEmailVerified == true) {
-              return const NotesView();
-            } else if (user != null && user.isEmailVerified == false) {
-              return const VerifyEmailView();
-            } else {
-              return const LoginView();
-            }
-
-          default:
-            return const CircularProgressIndicator();
         }
       },
     );

@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:mynotes/services/auth/auth_user.dart' show AuthUser;
 
 abstract class AuthProvider {
@@ -13,4 +14,9 @@ abstract class AuthProvider {
   });
   Future<void> logOut();
   Future<void> sendEmailVerification();
+  Future<void> changePassword({
+    required String email,
+    required String password,
+    required String newPassword,
+  });
 }

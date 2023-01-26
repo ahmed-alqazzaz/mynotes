@@ -42,22 +42,6 @@ class _LoginViewState extends State<LoginView> {
     return BlocListener<AuthBloc, AuthState>(
       listener: (context, state) async {
         if (state is AuthStateLoggedOut) {
-          // final closeDialog = _closeDialogHandle;
-          // if (state.loading != null) {
-          //   print("h");
-          // } else {
-          //   print("xy");
-          // }
-          // if (state.loading == null && closeDialog != null) {
-          //   closeDialog();
-          //   _closeDialogHandle = null;
-          // } else if (state.loading is Loading && closeDialog == null) {
-          //   _closeDialogHandle = showLoadingDialog(
-          //     context: context,
-          //     text: "Loading...",
-          //   );
-          // }
-
           if (state.exception is UserNotFoundAuthException) {
             return await showErrorDialog(
               context,
@@ -82,61 +66,50 @@ class _LoginViewState extends State<LoginView> {
         }
       },
       child: Scaffold(
-          appBar: AppBar(
-            title: const Text("Login"),
-          ),
-          body: FutureBuilder(
-            future: AuthService.firebase().initialize(),
-            builder: (context, snapshot) {
-              switch (snapshot.connectionState) {
-                case ConnectionState.done:
-                  return Column(
-                    children: [
-                      TextField(
-                        controller: _email,
-                        autofocus: true,
-                        autocorrect: false,
-                        keyboardType: TextInputType.emailAddress,
-                        decoration: const InputDecoration(
-                          hintText: "Enter Your Email Here",
-                        ),
-                      ),
-                      TextField(
-                        controller: _password,
-                        autocorrect: false,
-                        enableSuggestions: false,
-                        obscureText: true,
-                        decoration: const InputDecoration(
-                          hintText: "Enter Your Password Here",
-                        ),
-                      ),
-                      TextButton(
-                        onPressed: () async {
-                          final email = _email.text;
-                          final password = _password.text;
+        appBar: AppBar(
+          title: const Text("Login"),
+        ),
+        body: Column(
+          children: [
+            TextField(
+              controller: _email,
+              autofocus: true,
+              autocorrect: false,
+              keyboardType: TextInputType.emailAddress,
+              decoration: const InputDecoration(
+                hintText: "Enter Your Email Here",
+              ),
+            ),
+            TextField(
+              controller: _password,
+              autocorrect: false,
+              enableSuggestions: false,
+              obscureText: true,
+              decoration: const InputDecoration(
+                hintText: "Enter Your Password Here",
+              ),
+            ),
+            TextButton(
+              onPressed: () async {
+                final email = _email.text;
+                final password = _password.text;
 
-                          context.read<AuthBloc>().add(
-                              AuthEventLogin(email: email, password: password));
-                        },
-                        child: const Text("Login"),
-                      ),
-                      TextButton(
-                          onPressed: () {
-                            context
-                                .read<AuthBloc>()
-                                .add(const AuthEventSeekRegisteration());
-                            // final navigator = Navigator.of(context);
-                            // navigator.pushNamedAndRemoveUntil(
-                            //     "/register/", (route) => false);
-                          },
-                          child: const Text("Create an account"))
-                    ],
-                  );
-                default:
-                  return const Text("Loading");
-              }
-            },
-          )),
+                context
+                    .read<AuthBloc>()
+                    .add(AuthEventLogin(email: email, password: password));
+              },
+              child: const Text("Login"),
+            ),
+            TextButton(
+                onPressed: () {
+                  context
+                      .read<AuthBloc>()
+                      .add(const AuthEventSeekRegisteration());
+                },
+                child: const Text("Create an account"))
+          ],
+        ),
+      ),
     );
   }
 }

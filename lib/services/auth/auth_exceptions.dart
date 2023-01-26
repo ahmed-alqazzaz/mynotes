@@ -15,3 +15,8 @@ class WrongPasswordAuthException implements Exception {}
 class WeakPasswordAuthException implements Exception {}
 
 class EmailAlreadyInUseAuthException implements Exception {}
+
+class UpdatePasswordAuthException implements Exception {
+  final dynamic exception;
+  const UpdatePasswordAuthException(this.exception);
+}

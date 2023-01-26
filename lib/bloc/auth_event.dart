@@ -1,6 +1,18 @@
 import 'package:equatable/equatable.dart';
 import 'package:mynotes/services/auth/auth_provider.dart';
 
+class UpdateCredentials {
+  final String email;
+  final String password;
+  final String newPassword;
+
+  UpdateCredentials({
+    required this.email,
+    required this.password,
+    required this.newPassword,
+  });
+}
+
 abstract class AuthEvent {
   const AuthEvent();
 }
@@ -33,6 +45,11 @@ class AuthEventLogin extends AuthEvent {
     required this.email,
     required this.password,
   });
+}
+
+class AuthEventChangePassword extends AuthEvent {
+  final UpdateCredentials? credentials;
+  const AuthEventChangePassword({this.credentials});
 }
 
 class AuthEventLogout extends AuthEvent {
