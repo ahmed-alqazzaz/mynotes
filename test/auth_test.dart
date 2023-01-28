@@ -113,4 +113,13 @@ class MockAuthProvider implements AuthProvider {
     _user = newUser;
     return Future.value();
   }
+
+  @override
+  Future<void> changePassword(
+      {required String email,
+      required String password,
+      required String newPassword}) {
+    // TODO: implement changePassword
+    throw UnimplementedError();
+  }
 }
