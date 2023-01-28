@@ -44,4 +44,4 @@ app.*.map.json
 /android/app/release
 
 # Firebase
-/lib/firebase_options.dart
+C:\Users\acer\workspace1\mynotes\lib\firebase_options.dart
